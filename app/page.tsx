@@ -210,7 +210,7 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             <p className="p-4 bg-gray-100 rounded">
-              {generatedCaption.replace(/^"|"$/g, "")}
+              {generatedCaption.replace("*", "")}
             </p>
             <Button
               className="mt-2"
