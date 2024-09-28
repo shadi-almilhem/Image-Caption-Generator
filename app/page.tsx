@@ -1,101 +1,270 @@
-import Image from "next/image";
+"use client";
 
+import React, { useState, useCallback } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/hooks/use-toast";
+import { Loader2, Sparkles, Copy } from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+
+const imageTypes = [
+  "Adventure Sports",
+  "Architecture",
+  "Art",
+  "Automotive",
+  "Business",
+  "City",
+  "Culture",
+  "Education",
+  "Events",
+  "Fashion",
+  "Fitness",
+  "Food",
+  "Gaming",
+  "Health",
+  "History",
+  "Home Decor",
+  "Music",
+  "Nature",
+  "Personal",
+  "Pets",
+  "Space",
+  "Sports",
+  "Technology",
+  "Travel",
+  "Wildlife",
+];
+
+const vibes = [
+  "Adventurous",
+  "Bold",
+  "Calm",
+  "Cool",
+  "Curious",
+  "Dramatic",
+  "Elegant",
+  "Energetic",
+  "Excited",
+  "Funny",
+  "Futuristic",
+  "Gritty",
+  "Happy",
+  "Inspirational",
+  "Intense",
+  "Luxurious",
+  "Majestic",
+  "Minimalist",
+  "Mysterious",
+  "Nostalgic",
+  "Peaceful",
+  "Playful",
+  "Quirky",
+  "Relaxed",
+  "Romantic",
+  "Rustic",
+  "Sad",
+  "Sophisticated",
+  "Surreal",
+  "Tranquil",
+  "Warm",
+  "Whimsical",
+  "Wow",
+];
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [selectedImageType, setSelectedImageType] = useState<string>("");
+  const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
+  const [additionalInfo, setAdditionalInfo] = useState<string>("");
+  const [generatedCaption, setGeneratedCaption] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const { toast } = useToast();
+
+  const handleVibeChange = useCallback((value: string[]) => {
+    setSelectedVibes(value);
+  }, []);
+
+  const handleGenerateCaption = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/generate-caption", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageType: selectedImageType,
+          vibes: selectedVibes,
+          additionalInfo,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setGeneratedCaption(data.caption);
+      toast({
+        title: "Caption generated successfully ✅",
+        description: "Your caption is ready!",
+      });
+    } catch (error) {
+      console.error("Error generating caption:", error);
+      setError("Failed to generate caption. Please try again.");
+      toast({
+        title: "Error ❌",
+        description: "Failed to generate caption. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedImageType, selectedVibes, additionalInfo, toast]);
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(generatedCaption);
+    toast({
+      title: "Caption copied to clipboard 🚀",
+      description: "You can now paste it anywhere!",
+    });
+  }, [generatedCaption, toast]);
+
+  const isGenerateDisabled =
+    isLoading || selectedVibes.length === 0 || selectedImageType.length === 0;
+
+  return (
+    <div className="container max-w-6xl mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Trendy Image Caption Generator
+      </h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Image Type</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ToggleGroup
+              variant="outline"
+              type="single"
+              value={selectedImageType}
+              onValueChange={setSelectedImageType}
+              className="flex flex-wrap gap-2"
+              aria-label="Select image type"
+            >
+              {imageTypes.map((type) => (
+                <ToggleGroupItem
+                  key={type}
+                  value={type}
+                  className="flex-grow"
+                  aria-label={type}
+                >
+                  {type}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Vibes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ToggleGroup
+              variant="outline"
+              type="multiple"
+              value={selectedVibes}
+              onValueChange={handleVibeChange}
+              className="flex flex-wrap gap-2"
+              aria-label="Select vibes"
+            >
+              {vibes.map((vibe) => (
+                <ToggleGroupItem
+                  key={vibe}
+                  value={vibe}
+                  className="flex-grow"
+                  aria-label={vibe}
+                >
+                  {vibe}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </CardContent>
+        </Card>
+      </div>
+      {generatedCaption && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Generated Caption</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="p-4 bg-gray-100 rounded">
+              {generatedCaption.replace(/^"|"$/g, "")}
+            </p>
+            <Button
+              className="mt-2"
+              onClick={handleCopy}
+              variant="outline"
+              aria-label="Copy caption"
+            >
+              <Copy className="mr-2 h-4 w-4" />
+              Copy
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Additional Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Input
+            type="text"
+            placeholder="Enter additional details"
+            value={additionalInfo}
+            onChange={(e) => setAdditionalInfo(e.target.value)}
+            aria-label="Additional information"
+          />
+        </CardContent>
+
+        <CardFooter>
+          <Button
+            onClick={handleGenerateCaption}
+            disabled={isGenerateDisabled}
+            className="flex-1"
+            aria-label="Generate caption"
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Generate Caption
+              </>
+            )}
+          </Button>
+        </CardFooter>
+      </Card>
+
+      {error && (
+        <Card className="mt-6 border-red-500">
+          <CardContent>
+            <p className="text-red-500">{error}</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
