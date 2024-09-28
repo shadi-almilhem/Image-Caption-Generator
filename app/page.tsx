@@ -144,14 +144,16 @@ export default function Home() {
 
   return (
     <div className="container max-w-6xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-center">
-        Trendy Image Caption Generator
+      <h1 className="text-3xl text-gray-800 font-bold mb-6 text-center">
+        Image Caption Generator
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Image Type</CardTitle>
+            <CardTitle className="text-gray-800 font-semibold">
+              Image Type
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <ToggleGroup
@@ -178,7 +180,7 @@ export default function Home() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Vibes</CardTitle>
+            <CardTitle className="text-gray-800 font-semibold">Vibes</CardTitle>
           </CardHeader>
           <CardContent>
             <ToggleGroup
@@ -206,11 +208,13 @@ export default function Home() {
       {generatedCaption && (
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Generated Caption</CardTitle>
+            <CardTitle className="text-gray-800 font-semibold">
+              Generated Caption
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="p-4 bg-gray-100 rounded">
-              {generatedCaption.replace("*", "")}
+              {generatedCaption.replace(/"/g, "")}
             </p>
             <Button
               className="mt-2"
@@ -226,7 +230,9 @@ export default function Home() {
       )}
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle>Additional Information</CardTitle>
+          <CardTitle className="text-gray-800 font-semibold">
+            Additional Information
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Input

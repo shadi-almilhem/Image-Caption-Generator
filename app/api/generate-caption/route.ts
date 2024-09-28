@@ -66,7 +66,6 @@ export async function POST(request: Request) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
-    console.log(data);
     const generatedCaption = data.choices[0].message.content.trim();
 
     return NextResponse.json({ caption: generatedCaption });
