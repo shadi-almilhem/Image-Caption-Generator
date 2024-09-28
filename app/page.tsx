@@ -132,7 +132,7 @@ export default function Home() {
   }, [selectedImageType, selectedVibes, additionalInfo, toast]);
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(generatedCaption);
+    navigator.clipboard.writeText(generatedCaption.replace(/"/g, ""));
     toast({
       title: "Caption copied to clipboard 🚀",
       description: "You can now paste it anywhere!",
