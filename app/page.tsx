@@ -11,8 +11,10 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
+  CardDescription,
   CardFooter,
 } from "@/components/ui/card";
+import Link from "next/link";
 
 const imageTypes = [
   "Adventure Sports",
@@ -256,6 +258,15 @@ export default function Home() {
             )}
           </Button>
         </CardFooter>
+        <CardDescription className="mx-auto p-6 pt-0">
+          Made By{" "}
+          <Link
+            className="text-black font-semibold"
+            href="https://shadialmilhem.com"
+          >
+            Shadi Al Milhem
+          </Link>
+        </CardDescription>
       </Card>
 
       {error && (
