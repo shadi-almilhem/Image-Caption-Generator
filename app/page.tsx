@@ -1,11 +1,9 @@
 "use client";
-
 import React, { useState, useCallback } from "react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/hooks/use-toast";
-import { Loader2, Sparkles, Copy } from "lucide-react";
+import { Loader2, Sparkles, Copy, Camera, Zap } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -15,6 +13,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import Link from "next/link";
+import CustomToggleGroup from "@/components/ui/CustomToggleGroup";
 
 const imageTypes = [
   "Adventure Sports",
@@ -79,38 +78,16 @@ const vibes = [
   "Whimsical",
   "Wow",
 ];
+
 export default function Home() {
-  const [selectedImageType, setSelectedImageType] = useState<string>("");
-  const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
-  const [additionalInfo, setAdditionalInfo] = useState<string>("");
-  const [generatedCaption, setGeneratedCaption] = useState<string>("");
+  const [selectedImageType, setSelectedImageType] = useState("");
+  const [selectedVibes, setSelectedVibes] = useState([]);
+  const [additionalInfo, setAdditionalInfo] = useState("");
+  const [generatedCaption, setGeneratedCaption] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { toast } = useToast();
-
-  const handleVibeChange = useCallback((value: string[]) => {
-    setSelectedVibes((prevVibes) => {
-      // If the new value is empty, it means we're trying to deselect the last vibe
-      if (value.length === 0) {
-        return [];
-      }
-
-      // Find which vibe was toggled
-      const toggledVibe =
-        value.find((v) => !prevVibes.includes(v)) ||
-        prevVibes.find((v) => !value.includes(v));
-
-      if (toggledVibe) {
-        // If the vibe is already selected, remove it; otherwise, add it
-        return prevVibes.includes(toggledVibe)
-          ? prevVibes.filter((v) => v !== toggledVibe)
-          : [...prevVibes, toggledVibe];
-      }
-
-      return value;
-    });
-  }, []);
 
   const handleGenerateCaption = useCallback(async () => {
     setIsLoading(true);
@@ -162,104 +139,83 @@ export default function Home() {
     isLoading || selectedVibes.length === 0 || selectedImageType.length === 0;
 
   return (
-    <div className="container max-w-6xl mx-auto p-4">
-      <h1 className="text-3xl text-gray-800 font-bold mb-6 text-center">
+    <div className="container p-6 max-w-6xl mx-auto   min-h-screen">
+      <h1 className="text-4xl text-purple-800 font-bold mb-6 text-center">
         Image Caption Generator
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
           <CardHeader>
-            <CardTitle className="text-gray-800 font-semibold">
-              Image Type
+            <CardTitle className="text-purple-700 font-semibold flex items-center">
+              <Camera className="mr-2" /> Image Type
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ToggleGroup
-              variant="outline"
-              type="single"
+            <CustomToggleGroup
+              options={imageTypes}
               value={selectedImageType}
-              onValueChange={setSelectedImageType}
-              className="flex flex-wrap gap-2"
-              aria-label="Select image type"
-            >
-              {imageTypes.map((type) => (
-                <ToggleGroupItem
-                  key={type}
-                  value={type}
-                  className="flex-grow"
-                  aria-label={type}
-                >
-                  {type}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
+              onChange={setSelectedImageType}
+              className="max-h-64 overflow-y-auto"
+            />
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
           <CardHeader>
-            <CardTitle className="text-gray-800 font-semibold">Vibes</CardTitle>
+            <CardTitle className="text-purple-700 font-semibold flex items-center">
+              <Zap className="mr-2" /> Vibes
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <ToggleGroup
-              variant="outline"
-              type="multiple"
+            <CustomToggleGroup
+              options={vibes}
               value={selectedVibes}
-              onValueChange={handleVibeChange}
-              className="flex flex-wrap gap-2"
-              aria-label="Select vibes"
-            >
-              {vibes.map((vibe) => (
-                <ToggleGroupItem
-                  key={vibe}
-                  value={vibe}
-                  className="flex-grow"
-                  aria-label={vibe}
-                >
-                  {vibe}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
+              onChange={setSelectedVibes}
+              multiple={true}
+              className="max-h-64 overflow-y-auto"
+            />
           </CardContent>
         </Card>
       </div>
+
       {generatedCaption && (
-        <Card className="mt-6">
+        <Card className="mt-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
           <CardHeader>
-            <CardTitle className="text-gray-800 font-semibold">
+            <CardTitle className="text-purple-600 font-semibold">
               Generated Caption
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="p-4 bg-gray-100 rounded">
+            <p className="p-4 bg-purple-50 rounded-lg text-gray-800 font-medium">
               {generatedCaption.replace(/"/g, "")}
             </p>
             <Button
-              className="mt-2"
+              className="mt-4 bg-purple-500 hover:bg-purple-600 text-white"
               onClick={handleCopy}
-              variant="outline"
               aria-label="Copy caption"
             >
               <Copy className="mr-2 h-4 w-4" />
-              Copy
+              Copy to Clipboard
             </Button>
           </CardContent>
         </Card>
       )}
-      <Card className="mt-6">
+
+      <Card className="mt-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
         <CardHeader>
-          <CardTitle className="text-gray-800 font-semibold">
+          <CardTitle className="text-purple-700 font-semibold">
             Additional Information
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Input
             type="text"
-            placeholder="Enter additional details"
+            placeholder="Enter additional details to refine your caption"
             value={additionalInfo}
             onChange={(e) => setAdditionalInfo(e.target.value)}
             aria-label="Additional information"
+            className="border-purple-200 focus:border-purple-500"
           />
         </CardContent>
 
@@ -267,26 +223,26 @@ export default function Home() {
           <Button
             onClick={handleGenerateCaption}
             disabled={isGenerateDisabled}
-            className="flex-1"
+            className="w-full bg-gradient-to-b from-purple-500 to-purple-600 hover:from-purple-600  hover:to-purple-700 hover:bg-gradient-to-b   text-white transition-colors duration-300"
             aria-label="Generate caption"
           >
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Generating...
               </>
             ) : (
               <>
-                <Sparkles className="mr-2 h-4 w-4" />
+                <Sparkles className="mr-2 h-5 w-5" />
                 Generate Caption
               </>
             )}
           </Button>
         </CardFooter>
-        <CardDescription className="mx-auto p-6 pt-0">
-          Made By{" "}
+        <CardDescription className="text-center pb-2">
+          Created by{" "}
           <Link
-            className="text-black font-semibold"
+            className="text-purple-600 font-semibold hover:underline"
             href="https://shadialmilhem.com"
           >
             Shadi Al Milhem
@@ -295,9 +251,9 @@ export default function Home() {
       </Card>
 
       {error && (
-        <Card className="mt-6 border-red-500">
+        <Card className="mt-6 border-red-500 bg-red-50">
           <CardContent>
-            <p className="text-red-500">{error}</p>
+            <p className="text-red-600 font-medium">{error}</p>
           </CardContent>
         </Card>
       )}
