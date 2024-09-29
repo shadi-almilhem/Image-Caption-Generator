@@ -90,7 +90,26 @@ export default function Home() {
   const { toast } = useToast();
 
   const handleVibeChange = useCallback((value: string[]) => {
-    setSelectedVibes(value);
+    setSelectedVibes((prevVibes) => {
+      // If the new value is empty, it means we're trying to deselect the last vibe
+      if (value.length === 0) {
+        return [];
+      }
+
+      // Find which vibe was toggled
+      const toggledVibe =
+        value.find((v) => !prevVibes.includes(v)) ||
+        prevVibes.find((v) => !value.includes(v));
+
+      if (toggledVibe) {
+        // If the vibe is already selected, remove it; otherwise, add it
+        return prevVibes.includes(toggledVibe)
+          ? prevVibes.filter((v) => v !== toggledVibe)
+          : [...prevVibes, toggledVibe];
+      }
+
+      return value;
+    });
   }, []);
 
   const handleGenerateCaption = useCallback(async () => {
