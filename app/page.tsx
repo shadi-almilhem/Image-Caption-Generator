@@ -10,7 +10,6 @@ import {
   CardTitle,
   CardContent,
   CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import Link from "next/link";
 import CustomToggleGroup from "@/components/ui/CustomToggleGroup";
@@ -81,14 +80,60 @@ const vibes = [
 
 export default function Home() {
   const [selectedImageType, setSelectedImageType] = useState("");
-  const [selectedVibes, setSelectedVibes] = useState([]);
+  const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
   const [additionalInfo, setAdditionalInfo] = useState("");
   const [generatedCaption, setGeneratedCaption] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
   const { toast } = useToast();
+  const handleAnalyzeImage = async () => {
+    if (!selectedImage) {
+      toast({
+        title: "No image selected",
+        description: "Please select an image to analyze.",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    setIsAnalyzing(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("image", selectedImage);
+
+    try {
+      const response = await fetch("/api/analyze-image", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setAdditionalInfo(data.description);
+      toast({
+        title: "Image analyzed successfully ✅",
+        description:
+          "Image description has been added to additional information.",
+      });
+    } catch (error) {
+      console.error("Error analyzing image:", error);
+      setError("Failed to analyze image. Please try again.");
+      toast({
+        title: "Error ❌",
+        description: "Failed to analyze image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
   const handleGenerateCaption = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -96,7 +141,9 @@ export default function Home() {
     try {
       const response = await fetch("/api/generate-caption", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           imageType: selectedImageType,
           vibes: selectedVibes,
@@ -127,6 +174,13 @@ export default function Home() {
     }
   }, [selectedImageType, selectedVibes, additionalInfo, toast]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setSelectedImage(event.target.files[0]);
+      setAdditionalInfo(""); // Clear previous additional info
+    }
+  };
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(generatedCaption.replace(/"/g, ""));
     toast({
@@ -134,9 +188,6 @@ export default function Home() {
       description: "You can now paste it anywhere!",
     });
   }, [generatedCaption, toast]);
-
-  const isGenerateDisabled =
-    isLoading || selectedVibes.length === 0 || selectedImageType.length === 0;
 
   return (
     <div className="container p-6 max-w-6xl mx-auto   min-h-screen">
@@ -179,13 +230,60 @@ export default function Home() {
         </Card>
       </div>
 
-      {generatedCaption && (
-        <Card className="mt-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-          <CardHeader>
-            <CardTitle className="text-purple-600 font-semibold">
-              Generated Caption
-            </CardTitle>
-          </CardHeader>
+      <Card className="mt-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <CardHeader>
+          <CardTitle className="text-purple-700 font-semibold flex items-center">
+            <Camera className="mr-2" /> Upload and Analyze Image
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Input
+            type="file"
+            onChange={handleImageChange}
+            accept="image/*"
+            aria-label="Upload image"
+            className="border-purple-200 focus:border-purple-500 mb-4"
+          />
+          <Button
+            onClick={handleAnalyzeImage}
+            disabled={!selectedImage || isAnalyzing}
+            className="w-full bg-purple-500 py-5 hover:bg-purple-600 text-white"
+          >
+            {isAnalyzing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <Zap className="mr-2 h-4 w-4" />
+                Analyze Image
+              </>
+            )}
+          </Button>
+        </CardContent>
+        <CardHeader>
+          <CardTitle className="text-purple-700 font-semibold">
+            Additional Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <textarea
+            value={additionalInfo}
+            onChange={(e) => setAdditionalInfo(e.target.value)}
+            placeholder="Image description will appear here after analysis. You can also add or edit additional details."
+            className="w-full h-32 p-2 border border-purple-200 rounded focus:border-purple-500"
+          />
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <CardHeader>
+          <CardTitle className="text-purple-700 font-semibold">
+            Generate Caption
+          </CardTitle>
+        </CardHeader>
+        {generatedCaption && (
           <CardContent>
             <p className="p-4 bg-purple-50 rounded-lg text-gray-800 font-medium">
               {generatedCaption.replace(/"/g, "")}
@@ -199,31 +297,16 @@ export default function Home() {
               Copy to Clipboard
             </Button>
           </CardContent>
-        </Card>
-      )}
-
-      <Card className="mt-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-        <CardHeader>
-          <CardTitle className="text-purple-700 font-semibold">
-            Additional Information
-          </CardTitle>
-        </CardHeader>
+        )}
         <CardContent>
-          <Input
-            type="text"
-            placeholder="Enter additional details to refine your caption"
-            value={additionalInfo}
-            onChange={(e) => setAdditionalInfo(e.target.value)}
-            aria-label="Additional information"
-            className="border-purple-200 focus:border-purple-500"
-          />
-        </CardContent>
-
-        <CardFooter>
           <Button
             onClick={handleGenerateCaption}
-            disabled={isGenerateDisabled}
-            className="w-full bg-gradient-to-b from-purple-500 to-purple-600 hover:from-purple-600  hover:to-purple-700 hover:bg-gradient-to-b shadow-[inset_0px_-2px_0px_0px_rgba(0,_0,_0,_0.1),_inset_0px_2px_0px_0px_rgba(255,_255,_255,_0.3)]   text-white transition-colors duration-300 py-5"
+            disabled={
+              isLoading ||
+              selectedVibes.length === 0 ||
+              selectedImageType.length === 0
+            }
+            className="w-full bg-gradient-to-b from-purple-400 to-purple-600 hover:from-purple-600 hover:to-purple-700 hover:bg-gradient-to-b shadow-[inset_0px_-2px_0px_0px_rgba(0,_0,_0,_0.1),_inset_0px_2px_0px_0px_rgba(255,_255,_255,_0.3)] text-white transition-colors duration-300 py-5"
             aria-label="Generate caption"
           >
             {isLoading ? (
@@ -238,16 +321,7 @@ export default function Home() {
               </>
             )}
           </Button>
-        </CardFooter>
-        <CardDescription className="text-center pb-2">
-          Created by{" "}
-          <Link
-            className="text-purple-600 font-semibold hover:underline"
-            href="https://shadialmilhem.com"
-          >
-            Shadi Al Milhem
-          </Link>
-        </CardDescription>
+        </CardContent>
       </Card>
 
       {error && (
@@ -257,6 +331,15 @@ export default function Home() {
           </CardContent>
         </Card>
       )}
+      <CardDescription className="text-center p-2">
+        Created by{" "}
+        <Link
+          className="text-purple-600 font-semibold hover:underline"
+          href="https://shadialmilhem.com"
+        >
+          Shadi Al Milhem
+        </Link>
+      </CardDescription>
     </div>
   );
 }
