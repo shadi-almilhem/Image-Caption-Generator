@@ -223,7 +223,7 @@ export default function Home() {
           <Button
             onClick={handleGenerateCaption}
             disabled={isGenerateDisabled}
-            className="w-full bg-gradient-to-b from-purple-500 to-purple-600 hover:from-purple-600  hover:to-purple-700 hover:bg-gradient-to-b   text-white transition-colors duration-300 py-5"
+            className="w-full bg-gradient-to-b from-purple-500 to-purple-600 hover:from-purple-600  hover:to-purple-700 hover:bg-gradient-to-b shadow-[inset_0px_-2px_0px_0px_rgba(0,_0,_0,_0.1),_inset_0px_2px_0px_0px_rgba(255,_255,_255,_0.3)]   text-white transition-colors duration-300 py-5"
             aria-label="Generate caption"
           >
             {isLoading ? (
