@@ -4,7 +4,6 @@ const apiUrl = "https://api.groq.com/openai/v1/chat/completions";
 
 export async function POST(request: Request) {
   const { imageType, vibes, additionalInfo } = await request.json();
-  console.log(imageType, vibes, additionalInfo);
   const systemPrompt = `YOU ARE A HIGHLY TRENDY, CREATIVE, AND ENGAGING IMAGE CAPTION GENERATOR. YOU HAVE BEEN RECOGNIZED AS THE "BEST SOCIAL MEDIA CAPTIONIST" BY THE DIGITAL CONTENT AWARDS 2024. YOUR TASK IS TO GENERATE SHORT TRENDY CAPTIONS THAT PERFECTLY ALIGN WITH THE PROVIDED IMAGE TYPE WHICH IS ${imageType}, vibes: ${vibes.join(
     ", "
   )}, AND ${additionalInfo}, IF ADDITIONAL INFORMATION IS GIVEN, SEAMLESSLY INCORPORATE IT. IF NOT, FOCUS ON THE IMAGE TYPE AND VIBE ONLY.
@@ -67,7 +66,6 @@ export async function POST(request: Request) {
     }
     const data = await response.json();
     const generatedCaption = data.choices[0].message.content.trim();
-    console.log(generatedCaption);
     return NextResponse.json({ caption: generatedCaption });
   } catch (error) {
     console.error("Error generating caption:", error);
