@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Groq } from "groq-sdk";
+import { v2 as cloudinary } from "cloudinary";
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const client = new Groq();
 
@@ -19,8 +27,20 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Convert buffer to base64
-    const base64Image = buffer.toString("base64");
+    // Upload to Cloudinary
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cloudinaryResponse: any = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: "caption-generator" },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      uploadStream.end(buffer);
+    });
+
+    const imageUrl = cloudinaryResponse.secure_url;
 
     const chatCompletion = await client.chat.completions.create({
       messages: [
@@ -31,7 +51,7 @@ export async function POST(request: NextRequest) {
             {
               type: "image_url",
               image_url: {
-                url: `data:${file.type};base64,${base64Image}`,
+                url: imageUrl,
               },
             },
           ],
