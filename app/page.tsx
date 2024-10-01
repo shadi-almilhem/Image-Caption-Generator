@@ -84,16 +84,52 @@ export default function Home() {
   const [additionalInfo, setAdditionalInfo] = useState("");
   const [generatedCaption, setGeneratedCaption] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
 
   const { toast } = useToast();
-  const handleAnalyzeImage = async () => {
-    if (!selectedImage) {
+  const handleImageUpload = async (file: File) => {
+    setIsUploading(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const response = await fetch("/api/upload-image", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setUploadedImageUrl(data.imageUrl);
       toast({
-        title: "No image selected",
-        description: "Please select an image to analyze.",
+        title: "Image uploaded successfully ✅",
+        description: "You can now analyze the image.",
+      });
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      setError("Failed to upload image. Please try again.");
+      toast({
+        title: "Error ❌",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+  const handleAnalyzeImage = async () => {
+    if (!uploadedImageUrl) {
+      toast({
+        title: "No image uploaded",
+        description: "Please upload an image before analyzing.",
         variant: "destructive",
       });
       return;
@@ -102,13 +138,13 @@ export default function Home() {
     setIsAnalyzing(true);
     setError(null);
 
-    const formData = new FormData();
-    formData.append("image", selectedImage);
-
     try {
       const response = await fetch("/api/analyze-image", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ imageUrl: uploadedImageUrl }),
       });
 
       if (!response.ok) {
@@ -177,7 +213,8 @@ export default function Home() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      setSelectedImage(event.target.files[0]);
+      const file = event.target.files[0];
+      handleImageUpload(file);
       setAdditionalInfo(""); // Clear previous additional info
     }
   };
@@ -243,13 +280,19 @@ export default function Home() {
             accept="image/*"
             aria-label="Upload image"
             className="border-purple-200 focus:border-purple-500 mb-4"
+            disabled={isUploading}
           />
           <Button
             onClick={handleAnalyzeImage}
-            disabled={!selectedImage || isAnalyzing}
+            disabled={!uploadedImageUrl || isAnalyzing || isUploading}
             className="w-full bg-purple-500 py-5 hover:bg-purple-600 text-white"
           >
-            {isAnalyzing ? (
+            {isUploading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Uploading...
+              </>
+            ) : isAnalyzing ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Analyzing...
