@@ -3,7 +3,17 @@ import React, { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/hooks/use-toast";
-import { Loader2, Sparkles, Copy, Camera, Zap } from "lucide-react";
+import { Playfair_Display_SC } from "next/font/google";
+import {
+  Loader2,
+  Sparkles,
+  Copy,
+  Image as ImageIcon,
+  Palette,
+  ImageUp,
+  WandSparkles,
+  Zap,
+} from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -13,7 +23,11 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import CustomToggleGroup from "@/components/ui/CustomToggleGroup";
-
+const instrument = Playfair_Display_SC({
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["italic"],
+});
 const imageTypes = [
   "Adventure Sports",
   "Architecture",
@@ -228,7 +242,13 @@ export default function Home() {
 
   return (
     <div className="container p-6 max-w-6xl mx-auto   min-h-screen">
-      <h1 className="text-4xl text-purple-800 font-bold mb-6 text-center">
+      <h1 className="text-4xl text-purple-700 font-bold mb-6 text-center">
+        <span
+          className={`${instrument.className} bg-gradient-to-r to-purple-700 from-indigo-600 
+        text-transparent bg-clip-text ${instrument.style} px-1   antialiased`}
+        >
+          AI
+        </span>{" "}
         Image Caption Generator
       </h1>
 
@@ -236,7 +256,7 @@ export default function Home() {
         <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
           <CardHeader>
             <CardTitle className="text-purple-700 font-semibold flex items-center">
-              <Camera className="mr-2" /> Image Type
+              <ImageIcon className="mr-2" /> Image Type
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -252,7 +272,7 @@ export default function Home() {
         <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
           <CardHeader>
             <CardTitle className="text-purple-700 font-semibold flex items-center">
-              <Zap className="mr-2" /> Vibes
+              <Palette className="mr-2" /> Vibes
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -270,7 +290,7 @@ export default function Home() {
       <Card className="mt-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
         <CardHeader>
           <CardTitle className="text-purple-700 font-semibold flex items-center">
-            <Camera className="mr-2" /> Upload and Analyze Image
+            <ImageUp className="mr-2" /> Upload and Analyze Image
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -322,7 +342,8 @@ export default function Home() {
 
       <Card className="mt-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
         <CardHeader>
-          <CardTitle className="text-purple-700 font-semibold">
+          <CardTitle className="text-purple-700 font-semibold flex items-center">
+            <WandSparkles className="mr-2" />
             Generate Caption
           </CardTitle>
         </CardHeader>
