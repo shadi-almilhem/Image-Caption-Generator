@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
           ],
         },
       ],
-      model: "llama-3.2-11b-vision-preview",
+      model: "llama-3.2-90b-vision-preview",
     });
 
     const imageDescription = chatCompletion.choices[0].message.content || "";
