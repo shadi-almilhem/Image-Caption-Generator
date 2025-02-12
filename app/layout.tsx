@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
-import { Lato } from "next/font/google";
-const poppins = Lato({
+import { DM_Sans } from "next/font/google";
+const DMSans = DM_Sans({
   subsets: ["latin"],
   weight: ["400", "700"],
 });
@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.className}  antialiased bg-purple-50`}>
+      <body className={`${DMSans.className}  antialiased bg-purple-50`}>
         {children}
         <Toaster />
       </body>
