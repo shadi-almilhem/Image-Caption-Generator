@@ -120,7 +120,7 @@ export default function CaptionGenerationCard({
     const text = match ? caption.slice(0, -emoji.length) : caption;
 
     return (
-      <div className="p-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border border-purple-100 transition-all duration-300 ease-in-out opacity-100 transform translate-y-0">
+      <div className="p-4 bg-linear-to-br from-purple-50 to-blue-50 rounded-lg border border-purple-100 transition-all duration-300 ease-in-out opacity-100 transform translate-y-0">
         {text && <span className="text-lg font-medium">{text.trim()}</span>}
       </div>
     );
