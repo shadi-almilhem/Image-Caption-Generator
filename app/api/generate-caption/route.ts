@@ -72,7 +72,7 @@ STRICT PROHIBITIONS:
 Your output should be a single sentence (maximum 10 words) followed by one emoji—a masterpiece of brevity, creativity, and relevance that perfectly captures the essence of the image for Instagram.`;
 
   const requestBody = {
-    model: "llama-3.3-70b-versatile",
+    model: "meta-llama/llama-4-maverick-17b-128e-instruct",
     messages: [
       { role: "system", content: systemPrompt },
       {
