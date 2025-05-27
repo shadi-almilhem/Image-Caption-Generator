@@ -191,7 +191,7 @@ export default function CaptionGenerationCard({
                 selectedVibes.length === 0 ||
                 selectedImageType.length === 0
               }
-              className="flex-1 py-6 text-lg font-medium transition-all hover:scale-[1.01]"
+              className="flex-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white py-6 text-lg font-medium transition-all hover:shadow-lg duration-300"
             >
               {isLoading ? (
                 <>
