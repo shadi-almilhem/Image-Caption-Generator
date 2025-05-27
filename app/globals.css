@@ -69,9 +69,6 @@ body {
 }
 
 @layer base {
-  body {
-    @apply bg-background text-foreground;
-  }
   .preview-container {
     position: relative;
     min-height: 128px; /* h-32 equivalent */
